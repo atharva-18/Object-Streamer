@@ -12,11 +12,11 @@ parser.add_argument("duration", help="recording duration in seconds")
 parser.add_argument("fps", help="frames per second")
 args = parser.parse_args()
 
-INDEX = args.camera_index
+INDEX = int(args.camera_index)
 PATH = args.save_path
-DURATION = args.duration
-FPS = args.fps
-DELAY = (1/FPS) * 0.95 #delay in seconds
+DURATION = int(args.duration)
+FPS = int(args.fps)
+DELAY = (1/FPS) * 0.96 #delay in seconds
 
 class Streamer():
     """
@@ -34,8 +34,9 @@ class Streamer():
         Records frame by frame
         """
         frames = []
-        cap = cv2.VideoCapture(self.index)
+        cap = cv2.VideoCapture(self.index, cv2.CAP_DSHOW)
         start_time = time.time()
+        print("Recording...", flush=True)
 
         while time.time()-start_time < self.duration:
             ret, frame = cap.read()
@@ -46,19 +47,17 @@ class Streamer():
             time.sleep(self.delay)
 
         cap.release()
+        cv2.destroyAllWindows()
         return frames
 
     def capture(self):
         """
         Start capturing
         """
-        fourcc = cv2.VideoWriter_fourcc(*'DIVX')
-        out = cv2.VideoWriter(os.path.join(self.save_path, 'output.avi'), fourcc, 20.0, (640, 480))
-
         frames = self.start()
-        cfg_file = './cfg/yolov3.cfg'
-        weight_file = './weights/yolov3.weights'
-        namesfile = 'data/coco.names'
+        cfg_file = os.path.join(os.getcwd(), 'cfg\\yolov3.cfg')
+        weight_file = os.path.join(os.getcwd(), 'weights\\yolov3.weights')
+        namesfile = os.path.join(os.getcwd(), 'data\\coco.names')
 
         m = Darknet(cfg_file)
         m.load_weights(weight_file)
@@ -67,15 +66,29 @@ class Streamer():
         nms_thresh = 0.6
         iou_thresh = 0.4
 
+        cap = cv2.VideoCapture(self.index, cv2.CAP_DSHOW)
+        fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+        height = int(cap.get(3))
+        width = int(cap.get(4))
+        out = cv2.VideoWriter(os.path.join(self.save_path, 'output.avi'),
+                              fourcc,
+                              int(len(frames)/self.duration),
+                              (height, width))
+        cap.release()
+
+        counter = 0
+        print(f"Total {len(frames)} frames captured.")
         for frame in frames:
+            print(f"Processing...{round((counter/len(frames))*100, 2)}"+"%", end='\r', flush=True)
             resized_frame = cv2.resize(frame, (m.width, m.height))
             boxes = detect_objects(m, resized_frame, iou_thresh, nms_thresh)
             frame = plot_boxes(frame, boxes, class_names, plot_labels=True)
-
-            frame = cv2.flip(frame, 0)
+            frame = cv2.resize(frame, (width, height))
             out.write(frame)
+            counter += 1
 
         out.release()
+        cv2.destroyAllWindows()
 
 
 S = Streamer(INDEX, DURATION, FPS, PATH, DELAY)

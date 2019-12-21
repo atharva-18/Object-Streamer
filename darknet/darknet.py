@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-
 class YoloLayer(nn.Module):
     def __init__(self, anchor_mask=[], num_classes=0, anchors=[], num_anchors=1):
         super(YoloLayer, self).__init__()
@@ -232,7 +231,7 @@ class Darknet(nn.Module):
             
             percent_comp = (counter / len(self.blocks)) * 100
 
-            print('Loading weights. Please Wait...{:.2f}% Complete'.format(percent_comp), end = '\r', flush = True)
+            # print('Loading weights. Please Wait...{:.2f}% Complete'.format(percent_comp), end = '\r', flush = True)
 
             counter += 1
 
@@ -258,17 +257,17 @@ def get_region_boxes(output, conf_thresh, num_classes, anchors, num_anchors, onl
     all_boxes = []
     output = output.view(batch*num_anchors, 5+num_classes, h*w).transpose(0,1).contiguous().view(5+num_classes, batch*num_anchors*h*w)
 
-    grid_x = torch.linspace(0, w-1, w).repeat(h,1).repeat(batch*num_anchors, 1, 1).view(batch*num_anchors*h*w).type_as(output) #cuda()
-    grid_y = torch.linspace(0, h-1, h).repeat(w,1).t().repeat(batch*num_anchors, 1, 1).view(batch*num_anchors*h*w).type_as(output) #cuda()
-    xs = torch.sigmoid(output[0]) + grid_x
-    ys = torch.sigmoid(output[1]) + grid_y
+    grid_x = torch.linspace(0, w-1, w).repeat(h,1).repeat(batch*num_anchors, 1, 1).view(batch*num_anchors*h*w).type_as(output).cuda()
+    grid_y = torch.linspace(0, h-1, h).repeat(w,1).t().repeat(batch*num_anchors, 1, 1).view(batch*num_anchors*h*w).type_as(output).cuda()
+    xs = torch.sigmoid(output[0]).cuda() + grid_x
+    ys = torch.sigmoid(output[1]).cuda() + grid_y
 
     anchor_w = torch.Tensor(anchors).view(num_anchors, anchor_step).index_select(1, torch.LongTensor([0]))
     anchor_h = torch.Tensor(anchors).view(num_anchors, anchor_step).index_select(1, torch.LongTensor([1]))
-    anchor_w = anchor_w.repeat(batch, 1).repeat(1, 1, h*w).view(batch*num_anchors*h*w).type_as(output) #cuda()
-    anchor_h = anchor_h.repeat(batch, 1).repeat(1, 1, h*w).view(batch*num_anchors*h*w).type_as(output) #cuda()
-    ws = torch.exp(output[2]) * anchor_w
-    hs = torch.exp(output[3]) * anchor_h
+    anchor_w = anchor_w.repeat(batch, 1).repeat(1, 1, h*w).view(batch*num_anchors*h*w).type_as(output).cuda()
+    anchor_h = anchor_h.repeat(batch, 1).repeat(1, 1, h*w).view(batch*num_anchors*h*w).type_as(output).cuda()
+    ws = torch.exp(output[2]).cuda() * anchor_w
+    hs = torch.exp(output[3]).cuda() * anchor_h
 
     det_confs = torch.sigmoid(output[4])
     cls_confs = torch.nn.Softmax(dim=1)(output[5:5+num_classes].transpose(0,1)).detach()

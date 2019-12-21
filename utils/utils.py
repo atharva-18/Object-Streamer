@@ -1,6 +1,10 @@
 import time
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import torch
+import numpy as np
+import cv2
+import io
 from PIL import Image
 from tempfile import NamedTemporaryFile
 
@@ -129,10 +133,10 @@ def detect_objects(model, img, iou_thresh, nms_thresh):
     finish = time.time()
     
     # Print the time it took to detect objects
-    print('\n\nIt took {:.3f}'.format(finish - start), 'seconds to detect the objects in the image.\n')
+    # print('\n\nIt took {:.3f}'.format(finish - start), 'seconds to detect the objects in the image.\n')
     
     # Print the number of objects detected
-    print('Number of Objects Detected:', len(boxes), '\n')
+    # print('Number of Objects Detected:', len(boxes), '\n')
     
     return boxes
 
@@ -172,7 +176,19 @@ def print_objects(boxes, class_names):
             result[class_names[cls_id]] = cls_conf.item()
     return result
 
-            
+
+def get_img_from_fig(fig, dpi=180):
+    buf = io.BytesIO()
+    fig.savefig(buf, format="jpeg", dpi=180)
+    buf.seek(0)
+    img_arr = np.frombuffer(buf.getvalue(), dtype=np.uint8)
+    buf.close()
+    img = cv2.imdecode(img_arr, 1)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    return img
+
+
 def plot_boxes(img, boxes, class_names, plot_labels, color = None):
     
     # Define a tensor used to set the colors of the bounding boxes
@@ -257,12 +273,6 @@ def plot_boxes(img, boxes, class_names, plot_labels, color = None):
             # Draw the labels on top of the image
             a.text(x1 + lxc, y1 - lyc, conf_tx, fontsize = 24, color = 'k',
                    bbox = dict(facecolor = rgb, edgecolor = rgb, alpha = 0.8))        
-        
-    tmp_plot = NamedTemporaryFile()
-    plt.savefig(tmp_plot.name, format='png')
-    
-    plotted_image = Image.open(tmp_plot.name)
-
-    tmp_plot.close()
-
-    return plotted_image
+    plt_img = get_img_from_fig(fig)
+    plt.close('all')
+    return plt_img
