@@ -1,0 +1,6 @@
+opencv3
+torch
+torchvision
+h5py
+numpy
+matplotlib
