@@ -1,2 +1,5 @@
 *.pyc
 .vscode
+yolov3.weights
+output.avi
+sample.jpg
