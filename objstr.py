@@ -2,6 +2,7 @@ import os
 import argparse
 import time
 import cv2
+import numpy as np
 from utils import *
 from darknet import Darknet
 
@@ -16,7 +17,7 @@ INDEX = int(args.camera_index)
 PATH = args.save_path
 DURATION = int(args.duration)
 FPS = int(args.fps)
-DELAY = (1/FPS) * 0.96 #delay in seconds
+DELAY = (1/FPS) * 0.90 #delay in seconds
 
 class Streamer():
     """
@@ -59,7 +60,9 @@ class Streamer():
         weight_file = os.path.join(os.getcwd(), 'weights/yolov3.weights')
         namesfile = os.path.join(os.getcwd(), 'data/coco.names')
 
-        m = Darknet(cfg_file)
+        device = torch.device('cuda:0')
+
+        m = Darknet(cfg_file).cuda(device)
         m.load_weights(weight_file)
 
         class_names = load_class_names(namesfile)
@@ -86,7 +89,8 @@ class Streamer():
 
         out.release()
         cv2.destroyAllWindows()
-        print("Done.", flush=True)
+        print()
+        print("Done.")
 
 
 S = Streamer(INDEX, DURATION, FPS, PATH, DELAY)

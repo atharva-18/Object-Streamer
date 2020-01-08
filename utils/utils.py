@@ -62,7 +62,7 @@ def nms(boxes, iou_thresh):
     
     # Create a PyTorch Tensor to keep track of the detection confidence
     # of each predicted bounding box
-    det_confs = torch.zeros(len(boxes))
+    det_confs = torch.zeros(len(boxes)).cuda()
     
     # Get the detection confidence of each predicted bounding box
     for i in range(len(boxes)):
@@ -113,7 +113,7 @@ def detect_objects(model, img, iou_thresh, nms_thresh):
     # The image is transposed, then converted to a FloatTensor of dtype float32, then
     # Normalized to values between 0 and 1, and finally unsqueezed to have the correct
     # shape of 1 x 3 x 416 x 416
-    img = torch.from_numpy(img.transpose(2,0,1)).float().div(255.0).unsqueeze(0)
+    img = torch.from_numpy(img.transpose(2,0,1)).float().div(255.0).unsqueeze(0).cuda()
     
     # Feed the image to the neural network with the corresponding NMS threshold.
     # The first step in NMS is to remove all bounding boxes that have a very low
@@ -179,7 +179,7 @@ def print_objects(boxes, class_names):
 
 def get_img_from_fig(fig, dpi=180):
     buf = io.BytesIO()
-    fig.savefig(buf, format="jpeg", dpi=180)
+    fig.savefig(buf, format="png", dpi=360, bbox_inches='tight')
     buf.seek(0)
     img_arr = np.frombuffer(buf.getvalue(), dtype=np.uint8)
     buf.close()
@@ -192,7 +192,7 @@ def get_img_from_fig(fig, dpi=180):
 def plot_boxes(img, boxes, class_names, plot_labels, color = None):
     
     # Define a tensor used to set the colors of the bounding boxes
-    colors = torch.FloatTensor([[1,0,1],[0,0,1],[0,1,1],[0,1,0],[1,1,0],[1,0,0]])
+    colors = torch.FloatTensor([[1,0,1],[0,0,1],[0,1,1],[0,1,0],[1,1,0],[1,0,0]]).cuda()
     
     # Define a function to set the colors of the bounding boxes
     def get_color(c, x, max_val):
@@ -271,8 +271,9 @@ def plot_boxes(img, boxes, class_names, plot_labels, color = None):
             lyc = (img.shape[0] * 1.180) / 100
             
             # Draw the labels on top of the image
-            a.text(x1 + lxc, y1 - lyc, conf_tx, fontsize = 24, color = 'k',
-                   bbox = dict(facecolor = rgb, edgecolor = rgb, alpha = 0.8))        
+            a.text(x1 + lxc, y1 - lyc, conf_tx, fontsize = 10, color = 'k',
+                   bbox = dict(facecolor = rgb, edgecolor = rgb, alpha = 0.8))      
+    plt.axis('off')  
     plt_img = get_img_from_fig(fig)
     plt.close('all')
     return plt_img
