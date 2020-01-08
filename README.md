@@ -9,6 +9,7 @@ Python program for capturing videos along with real-time object detection.
 <ul>
 <li>PyTorch</li>
 <li>OpenCV</li>
+<li>Nvidia GPU</li>
 </ul>
 
 A modified version of this program is currently being used as a part of state estimation in a driverless car currently in development by DJSRacing.
