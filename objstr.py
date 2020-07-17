@@ -12,17 +12,17 @@ import torch
 import tensorflow as tf
 import tensorflow.keras as K
 
-# parser = argparse.ArgumentParser()
-# parser.add_argument("camera_index", help="Index number of camera (web-cam is usually 0)")
-# parser.add_argument("save_path", help="Path where you want to save the video")
-# parser.add_argument("duration", help="recording duration in seconds")
-# parser.add_argument("fps", help="frames per second")
-# args = parser.parse_args()
+parser = argparse.ArgumentParser()
+parser.add_argument("camera_index", help="Index number of camera (web-cam is usually 0)")
+parser.add_argument("save_path", help="Path where you want to save the video")
+parser.add_argument("duration", help="recording duration in seconds")
+parser.add_argument("fps", help="frames per second")
+args = parser.parse_args()
 
-INDEX = 0 #int(args.camera_index)
-PATH = "" #args.save_path
-DURATION = 10 #int(args.duration)
-FPS = 20 #int(args.fps)
+INDEX = int(args.camera_index)
+PATH = args.save_path
+DURATION = int(args.duration)
+FPS = int(args.fps)
 DELAY = (1/FPS) * 0.90 #delay in seconds
 
 print(tf.__version__)
