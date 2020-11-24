@@ -1,5 +1,5 @@
 # Object-Stream
-Python program for capturing videos along with real-time object detection.
+Python program for real-time object detection with monocular depth estimation using conditional GANs (Isola et al., 2017).
 
 ![Status](https://img.shields.io/badge/Status-Experimental-green.svg)
 ![Generic badge](https://img.shields.io/badge/Python-3.7.3-Blue.svg)
@@ -12,6 +12,7 @@ Python program for capturing videos along with real-time object detection.
 <li>Nvidia GPU</li>
 </ul>
 
+Pix2Pix model is trained so as to learn the translation between an RGB image and its stereo depth estimate.
 A modified version of this program is currently being used as a part of state estimation in a driverless car currently in development by DJSRacing.
 
 ### Usage
